@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# mem: fr ca bu us, sw
+fr_col="#FFFFFF"
+ca_col="#BBBBBB"
+bu_col="#777777"
+us_col="#111111"
+sw_col="#FF0000" #red
+
+# how wide should our graphs be?
+# width="800" # set in collectd-graph-all
+
+# where are the RRDs?
+# rrdbase="/var/lib/collectd/rrd/`hostname`" # set in collectd-graph-all
+
+# the periods for the graphs we want to generate
+# periods="1h 1d 1w 1month" # set in collectd-graph-all
+
+# where do we want to put this?
+# imgdir="." # set in collectd-graph-all
+outdir="${imgdir}/mem"
+[[ -d "${outdir}" ]] || mkdir -p "${outdir}"
+
+# defs and areas
+DEFS="DEF:us=${rrdbase}/memory/memory-used.rrd:value:AVERAGE \
+      DEF:bu=${rrdbase}/memory/memory-buffered.rrd:value:AVERAGE \
+      DEF:ca=${rrdbase}/memory/memory-cached.rrd:value:AVERAGE \
+      DEF:fr=${rrdbase}/memory/memory-free.rrd:value:AVERAGE \
+      DEF:sw=${rrdbase}/swap/swap-used.rrd:value:AVERAGE"
+AREAS="AREA:us${us_col}:us:STACK \
+       AREA:bu${bu_col}:bu:STACK \
+       AREA:ca${ca_col}:ca:STACK \
+       AREA:fr${fr_col}:fr:STACK \
+       AREA:sw${sw_col}:sw:STACK"
+
+# options
+OPTS="--imgformat PNG \
+      --width ${width} \
+      --base 1024 \
+      --alt-autoscale-max"
+
+for period in ${periods}; do
+    rrdtool graph ${outdir}/mem-${period}.png \
+	--end now --start end-${period} \
+	--vertical-label "mem (${period})" \
+	${OPTS} ${DEFS} ${AREAS}
+done

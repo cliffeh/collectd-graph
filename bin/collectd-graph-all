@@ -1,0 +1,22 @@
+#!/bin/bash
+
+f=`readlink -f ${0}`
+e=`dirname ${f}`
+
+# TODO read this in from /etc/collectd/collection.conf
+# where do we find our RRDs?
+export rrdbase="/var/lib/collectd/rrd/`hostname`"
+# where do we put the output?
+export basedir="${HOME}/opt/collectd-graph"
+export imgdir="${basedir}/images"
+# what periods do we want?
+export periods="1h 1d 1w 1month"
+# how wide should our graphs be?
+export width=800
+
+# generate our graphs
+${e}/collectd-graph-load > /dev/null
+${e}/collectd-graph-cpu > /dev/null
+${e}/collectd-graph-mem > /dev/null
+${e}/collectd-graph-if > /dev/null
+${e}/collectd-graph-disk > /dev/null

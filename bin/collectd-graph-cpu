@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# CPU: id us sy ni wa hi si st
+id_col="#FFFFFF"
+us_col="#DDDDDD"
+sy_col="#BBBBBB"
+ni_col="#999999"
+wa_col="#777777"
+hi_col="#555555"
+si_col="#333333"
+st_col="#111111"
+
+# how wide should our graphs be?
+# width="800" # set in collectd-graph-all
+
+# where are the RRDs?
+# rrdbase="/var/lib/collectd/rrd/`hostname`" # set in collectd-graph-all
+
+# the periods for the graphs we want to generate
+# periods="1h 1d 1w 1month" # set in collectd-graph-all
+
+# where do we want to put this?
+# imgdir="." # set in collectd-graph-all
+outdir="${imgdir}/cpu"
+[[ -d "${outdir}" ]] || mkdir -p "${outdir}"
+
+# defs, cdefs, and areas
+DEFS=""
+for stat in idle user system nice wait interrupt softirq steal; do
+    for cpu in `seq 0 7`; do
+	DEFS="${DEFS} DEF:${stat}${cpu}=${rrdbase}/cpu-${cpu}/cpu-${stat}.rrd:value:AVERAGE"
+    done
+done
+CDEFS=""
+for stat in idle user system nice wait interrupt softirq steal; do
+    CDEF="CDEF:${stat}=${stat}0"
+    for cpu in `seq 0 7`; do
+	CDEF="${CDEF},${stat}${cpu},+"
+    done
+    CDEFS="${CDEFS} ${CDEF},8,/"
+done
+AREAS="AREA:steal${st_col}:st:STACK \
+       AREA:softirq${si_col}:si:STACK \
+       AREA:interrupt${hi_col}:hi:STACK \
+       AREA:wait${wa_col}:wa:STACK \
+       AREA:nice${ni_col}:ni:STACK \
+       AREA:system${sy_col}:sy:STACK \
+       AREA:user${us_col}:us:STACK \
+       AREA:idle${id_col}:id:STACK"
+
+# options
+OPTS="--imgformat PNG \
+      --width ${width} \
+      --lower-limit 0 \
+      --upper-limit 100 \
+      --rigid"
+
+# generate cpu graphs
+for period in ${periods}; do
+    rrdtool graph ${outdir}/cpu-${period}.png \
+	--end now --start end-${period} \
+	--vertical-label "cpu (${period})" \
+	${OPTS} ${DEFS} ${CDEFS} ${AREAS}
+done

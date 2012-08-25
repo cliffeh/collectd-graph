@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# disk: r w, rt wt
+r_col="#333333"
+w_col="#CCCCCC"
+rt_col="#00FF00"
+wt_col="#0000FF"
+
+# how wide should our graphs be?
+# width="800" # set in collectd-graph-all
+
+# where are the RRDs?
+# rrdbase="/var/lib/collectd/rrd/`hostname`" # set in collectd-graph-all
+
+# the periods for the graphs we want to generate
+# periods="1h 1d 1w 1month" # set in collectd-graph-all
+
+# where do we want to put this?
+# imgdir="." # set in collectd-graph-all
+outdir="${imgdir}/disk"
+[[ -d "${outdir}" ]] || mkdir -p "${outdir}"
+
+# disks we want to graph
+disks="md0 md1"
+
+# lines
+LINES="LINE:r${r_col}:r \
+       LINE:w${w_col}:w"
+
+# options
+OPTS="--imgformat PNG --width ${width}"
+
+for disk in ${disks}; do
+    for period in ${periods}; do
+	rrdtool graph ${outdir}/${disk}-${period}.png \
+	    --end now --start end-${period} \
+	    --vertical-label "${disk} (${period})" \
+	    ${OPTS} \
+	    DEF:r=${rrdbase}/disk-${disk}/disk_ops.rrd:read:AVERAGE \
+	    DEF:w=${rrdbase}/disk-${disk}/disk_ops.rrd:write:AVERAGE \
+	    ${LINES}
+    done
+done

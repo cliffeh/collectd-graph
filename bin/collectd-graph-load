@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# load: 1m 5m 15m
+_1m_color="#DDDDDD"
+_5m_color="#AAAAAA"
+_15m_color="#111111"
+
+# how wide should our graphs be?
+# width="800" # set in collectd-graph-all
+
+# where are the RRDs?
+# rrdbase="/var/lib/collectd/rrd/`hostname`" # set in collectd-graph-all
+rrd="${rrdbase}/load/load.rrd"
+
+# the periods for the graphs we want to generate
+# periods="1h 1d 1w 1month" # set in collectd-graph-all
+
+# where do we want to put this?
+# imgdir="." # set in collectd-graph-all
+outdir="${imgdir}/load"
+[[ -d "${outdir}" ]] || mkdir -p "${outdir}"
+
+# defs and lines
+DEFS="DEF:st=${rrd}:shortterm:AVERAGE \
+      DEF:mt=${rrd}:midterm:AVERAGE \
+      DEF:lt=${rrd}:longterm:AVERAGE"
+LINES="LINE:st${_1m_color}:1m \
+       LINE:mt${_5m_color}:5m \
+       LINE:lt${_15m_color}:15m"
+
+# options
+OPTS="--imgformat PNG \
+      --width ${width} \
+      --base 1000 \
+      --alt-autoscale-max \
+      --lower-limit=0 \
+      --units-exponent=0"
+
+# generate load graphs
+for period in ${periods}; do
+    rrdtool graph ${outdir}/load-${period}.png \
+	--end now --start end-${period} \
+	--vertical-label "load (${period})" \
+	${OPTS} ${DEFS} ${LINES}
+done

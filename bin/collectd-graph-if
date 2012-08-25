@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# if: rx tx, rx_err tx_err
+rx_col="#333333"
+tx_col="#CCCCCC"
+rx_err_col="#FF0000" # red
+tx_err_col="#FF8040" # orange
+
+# how wide should our graphs be?
+# width="800" # set in collectd-graph-all
+
+# where are the RRDs?
+# rrdbase="/var/lib/collectd/rrd/`hostname`" # set in collectd-graph-all
+
+# the periods for the graphs we want to generate
+# periods="1h 1d 1w 1month" # set in collectd-graph-all
+
+# where do we want to put this?
+# imgdir="." # set in collectd-graph-all
+outdir="${imgdir}/if"
+[[ -d "${outdir}" ]] || mkdir -p "${outdir}"
+
+# interfaces we want to graph
+interfaces="eth0"
+
+# TODO all eth0!
+# defs and lines
+DEFS="DEF:rx=${rrdbase}/interface/if_octets-eth0.rrd:rx:AVERAGE \
+      DEF:tx=${rrdbase}/interface/if_octets-eth0.rrd:tx:AVERAGE \
+      DEF:rx_err=${rrdbase}/interface/if_errors-eth0.rrd:rx:AVERAGE \
+      DEF:tx_err=${rrdbase}/interface/if_errors-eth0.rrd:tx:AVERAGE"
+LINES="LINE:rx${rx_col}:rx \
+       LINE:tx${tx_col}:tx \
+       LINE:rx_err${rx_err_col}:rxerr \
+       LINE:tx_err${tx_err_col}:txerr"
+
+# options
+OPTS="--imgformat PNG \
+      --width ${width}"
+
+for iface in ${interfaces}; do
+    for period in ${periods}; do
+	rrdtool graph ${outdir}/${iface}-${period}.png \
+	    --end now --start end-${period} \
+	    --vertical-label "${iface} (${period})"\
+	    ${OPTS} \
+	    DEF:rx=${rrdbase}/interface/if_octets-${iface}.rrd:rx:AVERAGE \
+	    DEF:tx=${rrdbase}/interface/if_octets-${iface}.rrd:tx:AVERAGE \
+	    DEF:rx_err=${rrdbase}/interface/if_errors-${iface}.rrd:rx:AVERAGE \
+	    DEF:tx_err=${rrdbase}/interface/if_errors-${iface}.rrd:tx:AVERAGE \
+	    ${LINES}
+    done
+done
