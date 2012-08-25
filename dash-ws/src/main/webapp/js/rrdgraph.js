@@ -128,31 +128,11 @@ function RRDGraph(parent, id, settings) {
 			'stroke-width' : '0.25'
 		});
 	}
-
-	// this.testBox = this.svg.rect(this.chart, 0, 0, 100, 100, 0, 0, {
-	// 'fill' : 'black'
-	// });
-	// this.testBox.setAttribute('transform', 'scale(1 0.25)');
-
-	// "sliding window" containers; TODO parameterize the size of these?
-	// this.gs = new Array();
-	// this.gptr = this.leftMarginWidth + this.width;
-	// this.gs.push(this.svg.group(this.id + 'win1', {
-	// 'transform' : 'translate(' + this.gptr + ' ' + this.topMarginHeight
-	// + ')'
-	// }));
-	// this.gs.push(this.svg.group(this.id + 'win0', {
-	// 'transform' : 'translate(' + this.leftMarginWidth + ' '
-	// + this.topMarginHeight + ')'
-	// }));
-	//
-	// this.gindex = 1;
-
 }
 
 RRDGraph.prototype.addData = function(points) {
 	/*
-	 * expected format for p: [timestamp, y1, y2, ..., yn]
+	 * expected format for points: [timestamp, y1, y2, ..., yn]
 	 */
 
 	this.data.push(points);

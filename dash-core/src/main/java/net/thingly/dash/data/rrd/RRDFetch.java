@@ -20,6 +20,8 @@ public class RRDFetch {
 		this.filename = filename;
 	}
 
+	// TODO figure out how we're going to handle fetches from multiple files
+	// (e.g., memory: buffered, cache, used, free)
 	public List<RRDData> fetch() throws IOException {
 		return fetch(DEFAULT_CF);
 	}

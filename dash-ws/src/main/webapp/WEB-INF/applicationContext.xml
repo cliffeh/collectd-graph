@@ -3,12 +3,21 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+	<bean id="propertyPlaceholderConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>/WEB-INF/dash.properties</value>
+			</list>
+		</property>
+	</bean>
+
 	<bean name="host" class="java.net.InetAddress" factory-method="getLocalHost" />
 
 	<!-- TODO have this read the collectd config file directly for the location -->
 	<bean id="loadAverageService" class="net.thingly.dash.service.LoadAverageService">
 		<property name="rrdPath"
-			value="/var/lib/collectd/rrd/#{host.hostName}/load/load.rrd" />
+			value="${config.basePath}/#{host.hostName}/load/load.rrd" />
 	</bean>
 
 </beans> 
