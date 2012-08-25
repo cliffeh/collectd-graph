@@ -1,0 +1,10 @@
+#!/bin/bash
+
+CLASSPATH=""
+# dash-specific stuff
+CLASSPATH=${CLASSPATH}:dash-core/target/classes # dash-core-1.0-SNAPSHOT.jar
+CLASSPATH=${CLASSPATH}:dash-cli/target/classes # dash-cli-1.0-SNAPSHOT.jar
+# commons-cli
+CLASSPATH=${CLASSPATH}:$HOME/.m2/repository/commons-cli/commons-cli/1.2/commons-cli-1.2.jar
+
+java -cp ${CLASSPATH} net.thingly.dash.data.rrd.Main $@
